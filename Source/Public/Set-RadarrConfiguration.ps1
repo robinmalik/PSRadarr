@@ -9,25 +9,28 @@ function Set-RadarrConfiguration
 			The configuration is stored in the user's home directory under .PSRadarr/PSRadarrConfig.json.
 
 		.PARAMETER Server
-			The URL or hostname of the Radarr server (e.g., "http://localhost" or "http://radarr.local")
+			The URL or hostname of the Radarr server (e.g. 'myserver.domain.com')
 
 		.PARAMETER Port
-			The port number that Radarr is listening on (default is typically 7878)
+			The port number that Radarr is listening on. Defaults to 7878.
 
 		.PARAMETER Protocol
-			The protocol to use for connecting to the Radarr server (default is "http")
+			The protocol to use for connecting to the Radarr server. Defaults to 'http'.
 
 		.PARAMETER APIKey
-			The API key from your Radarr instance. Can be found in Radarr under Settings > General
+			The API key from your Radarr instance. Can be found in Radarr under Settings > General.
 
 		.PARAMETER APIVersion
-			The version of the Radarr API to use (typically "v3")
+			The version of the Radarr API to use. Defaults to 3.
+
+		.PARAMETER RootFolderPath
+			The root folder path where movies are stored.
 
 		.PARAMETER Default
-			If set to true, marks this server configuration as the default instance for PSRadarr commands
+			If set to true, marks this server configuration as the default instance for PSRadarr commands. Defaults to true.
 
 		.EXAMPLE
-			Set-RadarrConfiguration -Server "http://localhost" -Port 7878 -APIKey "your-api-key" -APIVersion "v3" -Default $true
+			Set-RadarrConfiguration -Server 'myserver.domain.com' -APIKey 'myapikey' -RootFolderPath 'D:\Movies'
 
 		.NOTES
 			File: Set-RadarrConfiguration.ps1
@@ -49,6 +52,9 @@ function Set-RadarrConfiguration
 
 		[Parameter(Mandatory = $false)]
 		[Int]$APIVersion = "3",
+
+		[Parameter(Mandatory = $true)]
+		[string]$RootFolderPath,
 
 		[Parameter(Mandatory = $false)]
 		[bool]$Default = $true
@@ -86,12 +92,13 @@ function Set-RadarrConfiguration
 	####################################################################################################
 	# Construct an object with the data we want to save
 	$ServerObject = [Ordered]@{
-		"Server"     = $Server
-		"Port"       = $Port
-		"Protocol"   = $Protocol
-		"APIKey"     = $APIKey
-		"APIVersion" = $APIVersion
-		"Default"    = $Default
+		"Server"         = $Server
+		"Port"           = $Port
+		"Protocol"       = $Protocol
+		"APIKey"         = $APIKey
+		"APIVersion"     = $APIVersion
+		"RootFolderPath" = $RootFolderPath
+		"Default"        = $Default
 	}
 
 	# Check if a server with the same Server and Port exists
@@ -111,6 +118,7 @@ function Set-RadarrConfiguration
 				$Entry.Protocol = $Protocol
 				$Entry.APIKey = $APIKey
 				$Entry.APIVersion = $APIVersion
+				$Entry.RootFolderPath = $RootFolderPath
 				$Entry.Default = $Default
 			}
 			else
