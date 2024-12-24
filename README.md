@@ -30,12 +30,14 @@ Get-RadarrMovie
 
 **Add a movie by name**:
 ```powershell
-Add-RadarrMovie -Title '8-bit Christmas'
+$Profile = Get-RadarrQualityProfile -Name '720p-webdl'
+Add-RadarrMovie -Title '8-bit Christmas' -QualityProfile $Profile.id
 ```
 
 **Add a movie by name and initiate a search**:
 ```powershell
-Add-RadarrMovie -Title '8-bit Christmas' -Search
+$Profile = Get-RadarrQualityProfile -Name '720p-webdl'
+Add-RadarrMovie -Title '8-bit Christmas' -QualityProfile $Profile.id -Search
 ```
 
 **Search TMDB (via Radarr) for a movie**:

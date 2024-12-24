@@ -10,6 +10,10 @@ function Add-RadarrMovie
 		[ValidatePattern('^\d{1,9}$')]
 		[String]$TMDBID,
 
+		[Parameter(Mandatory = $true)]
+		[int]
+		$QualityProfileId,
+
 		[Parameter(Mandatory = $false)]
 		[Switch]$Search
 	)
@@ -77,8 +81,8 @@ function Add-RadarrMovie
 
 	####################################################################################################
 	# Append what we need to add to Radarr for monitoring:
-	$Movie | Add-Member -MemberType NoteProperty -Name 'qualityProfileId' -Value 9 -Force
-	$Movie | Add-Member -MemberType NoteProperty -Name 'profileId' -Value 9 -Force
+	$Movie | Add-Member -MemberType NoteProperty -Name 'qualityProfileId' -Value $QualityProfileId -Force
+	$Movie | Add-Member -MemberType NoteProperty -Name 'profileId' -Value $QualityProfileId -Force
 	$Movie | Add-Member -MemberType NoteProperty -Name 'monitored' -Value $True -Force
 	$Movie | Add-Member -MemberType NoteProperty -Name 'rootFolderPath' -Value $Config.RootFolderPath -Force
 	#$Movie = $Movie | Select-Object * -ExcludeProperty alternateTitles,originalTitle
