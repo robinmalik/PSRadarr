@@ -28,24 +28,37 @@ See the [Changelog](CHANGELOG.md) for a list of changes.
 Get-RadarrMovie
 ```
 
-**Add a movie by name**:
+**Add a movie by IMDB ID**:
 ```powershell
 $Profile = Get-RadarrQualityProfile -Name '720p-webdl'
-Add-RadarrMovie -Title '8-bit Christmas' -QualityProfile $Profile.id
+Add-RadarrMovie -IMDBID 'tt0095016' -QualityProfile $Profile.id
 ```
 
-**Add a movie by name and initiate a search**:
+**Add a movie by a known IMDBID and initiate a search for it**:
 ```powershell
 $Profile = Get-RadarrQualityProfile -Name '720p-webdl'
-Add-RadarrMovie -Title '8-bit Christmas' -QualityProfile $Profile.id -Search
+Add-RadarrMovie -IMDBID 'tt0095016' -QualityProfile $Profile.id -Search
 ```
 
 **Search TMDB (via Radarr) for a movie**:
 ```powershell
-Search-RadarrMovie -Title '8-bit Christmas'
+Search-RadarrMovie -Name '8-bit Christmas'
 ```
 
-**Set the monitor status to $False for a movie**:
+**Search TMDB (via Radarr) for a movie and add to Radarr using the TMDBID (or IMDBID)**:
+```powershell
+$MovieRequired = Search-RadarrMovie -Name '8-bit Christmas' -ExactMatch
+$Profile = Get-RadarrQualityProfile -Name '720p-webdl'
+Add-RadarrMovie -TMDBID $MovieRequired.tmdbId -QualityProfile $Profile.id
+```
+or
+```powershell
+Add-RadarrMovie -IMDBID $MovieRequired.imdbId -QualityProfile $Profile.id
+```
+
+
+
+**Set the monitor status to $False for an existing movie**:
 ```powershell
 $Movie = Get-RadarrMovie -Title '8-bit Christmas'
 Set-RadarrMovie -Movie $Movie.id -Monitor $False
