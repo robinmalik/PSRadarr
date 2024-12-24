@@ -32,6 +32,14 @@ function Add-RadarrMovie
 
 
 	####################################################################################################
+	# If using IMDB, ensure the ID is in the correct format
+	if($ParameterSetName -eq 'IMDBID' -and $IMDBID -notmatch '^tt')
+	{
+		$IMDBID = 'tt' + $IMDBID
+	}
+
+
+	####################################################################################################
 	#Region Check if already in Radarr before attempting an addition
 	Write-Verbose -Message "Checking if the movie already exists"
 	try

@@ -32,6 +32,14 @@ function Get-RadarrMovie
 
 
     ####################################################################################################
+    # If using IMDB, ensure the ID is in the correct format
+    if($ParameterSetName -eq 'IMDBID' -and $IMDBID -notmatch '^tt')
+    {
+        $IMDBID = 'tt' + $IMDBID
+    }
+
+
+    ####################################################################################################
     #Region Define the path, parameters, headers and URI
     try
     {
@@ -69,10 +77,6 @@ function Get-RadarrMovie
                 }
                 'IMDBID'
                 {
-                    if($IMDBID -notmatch '^tt')
-                    {
-                        $IMDBID = 'tt' + $IMDBID
-                    }
                     $Data = $Data | Where-Object { $_.imdbId -eq "$IMDBID" }
                 }
                 'TMDBID'

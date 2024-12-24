@@ -11,11 +11,11 @@ function Search-RadarrMovie
 		.PARAMETER Name
 			The name of the movie to search for.
 
-		.PARAMETER TMDBID
-			The TMDB ID of the movie to search for.
-
 		.PARAMETER IMDBID
 			The IMDB ID of the movie to search for.
+
+		.PARAMETER TMDBID
+			The TMDB ID of the movie to search for.
 
 		.EXAMPLE
 			Search-RadarrMovie -Name "The Matrix"
@@ -32,12 +32,12 @@ function Search-RadarrMovie
 		[Parameter(Mandatory = $false, ParameterSetName = 'Name')]
 		[Switch]$ExactMatch,
 
-		[Parameter(Mandatory = $true, ParameterSetName = 'TMDBID')]
-		[String]$TMDBID,
-
 		[Parameter(Mandatory = $true, ParameterSetName = 'IMDBID')]
 		[ValidatePattern('^(tt)?\d{5,9}$')]
-		[String]$IMDBID
+		[String]$IMDBID,
+
+		[Parameter(Mandatory = $true, ParameterSetName = 'TMDBID')]
+		[String]$TMDBID
 	)
 
 	####################################################################################################
@@ -54,10 +54,19 @@ function Search-RadarrMovie
 
 
 	####################################################################################################
+	# If using IMDB, ensure the ID is in the correct format
+	if($ParameterSetName -eq 'IMDBID' -and $IMDBID -notmatch '^tt')
+	{
+		$IMDBID = 'tt' + $IMDBID
+	}
+
+
+	####################################################################################################
 	#Region Define the path, parameters, headers and URI
 	try
 	{
 		$Path = "/movie/lookup"
+
 		if($Name)
 		{
 			$Params = @{
@@ -74,16 +83,9 @@ function Search-RadarrMovie
 		elseif($IMDBID)
 		{
 			$Path = $Path + '/imdb'
-
-			if($IMDBID -notmatch '^tt')
-			{
-				$IMDBID = 'tt' + $IMDBID
-			}
-
 			$Params = @{
 				imdbId = $IMDBID
 			}
-
 		}
 		else
 		{
