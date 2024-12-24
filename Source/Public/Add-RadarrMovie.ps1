@@ -67,7 +67,7 @@ function Add-RadarrMovie
 
 
 	####################################################################################################
-	#Region Search TMDB for the movie
+	#Region Search for the movie (we need to get the data before adding it)
 	Write-Verbose -Message "Using Radarr lookup service to find the movie on TMDB"
 	try
 	{
@@ -78,6 +78,11 @@ function Add-RadarrMovie
 		elseif($IMDBID)
 		{
 			$Movie = Search-RadarrMovie -IMDBID $IMDBID
+		}
+
+		if(!$Movie)
+		{
+			throw "Could not find the movie to add"
 		}
 	}
 	catch
