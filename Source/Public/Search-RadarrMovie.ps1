@@ -29,10 +29,14 @@ function Search-RadarrMovie
 		[Parameter(Mandatory = $true, ParameterSetName = 'Name')]
 		[String]$Name,
 
+		[Parameter(Mandatory = $false, ParameterSetName = 'Name')]
+		[Switch]$ExactMatch,
+
 		[Parameter(Mandatory = $true, ParameterSetName = 'TMDBID')]
 		[String]$TMDBID,
 
 		[Parameter(Mandatory = $true, ParameterSetName = 'IMDBID')]
+		[ValidatePattern('^(tt)?\d{5,9}$')]
 		[String]$IMDBID
 	)
 
@@ -70,6 +74,12 @@ function Search-RadarrMovie
 		elseif($IMDBID)
 		{
 			$Path = $Path + '/imdb'
+
+			if($IMDBID -notmatch '^tt')
+			{
+				$IMDBID = 'tt' + $IMDBID
+			}
+
 			$Params = @{
 				imdbId = $IMDBID
 			}
@@ -99,6 +109,12 @@ function Search-RadarrMovie
 		$Data = Invoke-RestMethod -Uri $Uri -Headers $Headers -Method Get -ContentType 'application/json' -ErrorAction Stop
 		if($Data)
 		{
+			# If ExactMatch is specified, filter the results to only include the exact match
+			if($ExactMatch)
+			{
+				$Data = $Data | Where-Object { $_.title -eq $Name }
+			}
+
 			return $Data
 		}
 		else
