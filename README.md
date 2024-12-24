@@ -48,3 +48,7 @@ Search-RadarrMovie -Title '8-bit Christmas'
 $Movie = Get-RadarrMovie -Title '8-bit Christmas'
 Set-RadarrMovie -Movie $Movie.id -Monitor $False
 ```
+
+# Known Issues
+
+* Does not cater to multiple instances yet.
