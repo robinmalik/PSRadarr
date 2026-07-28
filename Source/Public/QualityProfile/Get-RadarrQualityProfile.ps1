@@ -1,6 +1,39 @@
 function Get-RadarrQualityProfile
 {
-	[CmdletBinding(DefaultParameterSetName = "All")]
+	<#
+		.SYNOPSIS
+			Retrieves quality profiles from Radarr.
+
+		.DESCRIPTION
+			Retrieves quality profile information from Radarr. Can return all quality profiles or filter by
+			specific criteria such as ID or name.
+
+		.PARAMETER Id
+			The quality profile ID to retrieve.
+
+		.PARAMETER Name
+			The name of the quality profile to retrieve.
+
+		.EXAMPLE
+			Get-RadarrQualityProfile
+
+		.EXAMPLE
+			Get-RadarrQualityProfile -Id '1'
+
+		.EXAMPLE
+			Get-RadarrQualityProfile -Name 'HD-1080p'
+
+		.EXAMPLE
+			$Profile = Get-RadarrQualityProfile -Name '720p-webdl'
+			Add-RadarrMovie -IMDBID 'tt1375666' -QualityProfileId $Profile.id
+
+			Looks up a profile by name and uses its ID when adding a movie.
+
+		.NOTES
+			When no parameters are specified, all quality profiles in Radarr are returned.
+	#>
+
+	[CmdletBinding(DefaultParameterSetName = 'All')]
 	param(
 		[Parameter(Mandatory = $false, ParameterSetName = 'Id')]
 		[String]$Id,
@@ -23,7 +56,7 @@ function Get-RadarrQualityProfile
 
 
 	####################################################################################################
-	#Region Define the path, parameters, headers and URI
+	#Region Define the path
 	try
 	{
 		$Path = '/qualityprofile'
@@ -31,10 +64,6 @@ function Get-RadarrQualityProfile
 		{
 			$Path += "/$Id"
 		}
-
-		# Generate the headers and URI
-		$Headers = Get-Headers
-		$Uri = Get-APIUri -RestEndpoint $Path -Params $Params
 	}
 	catch
 	{
@@ -45,10 +74,9 @@ function Get-RadarrQualityProfile
 
 	####################################################################################################
 	#Region make the main request
-	Write-Verbose "Querying: $Uri"
 	try
 	{
-		$Data = Invoke-RestMethod -Uri $Uri -Headers $Headers -Method Get -ContentType 'application/json' -ErrorAction Stop
+		$Data = Invoke-RadarrRequest -Path $Path -Method GET -SuppressWhatIf -ErrorAction Stop
 		if($Data)
 		{
 			if($Name)
@@ -63,5 +91,5 @@ function Get-RadarrQualityProfile
 	{
 		throw $_
 	}
-
+	#EndRegion
 }

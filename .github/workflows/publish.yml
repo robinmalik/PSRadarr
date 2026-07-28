@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - "main"
+    paths:
+      - "Source/**"
 
 jobs:
   publish-to-gallery:

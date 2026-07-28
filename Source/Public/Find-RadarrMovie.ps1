@@ -1,4 +1,4 @@
-function Search-RadarrMovie
+function Find-RadarrMovie
 {
 	<#
 		.SYNOPSIS
@@ -6,19 +6,32 @@ function Search-RadarrMovie
 
 		.DESCRIPTION
 			This uses the lookup service within Radarr to search for a movie by name, TMDB ID, or IMDB ID.
-			It does not search your local Radarr library, but rather The Movie Database (TMDb).
+			It does not search your local Radarr library, but rather The Movie Database (TMDb). To search
+			the local library, use Get-RadarrMovie.
 
 		.PARAMETER Name
 			The name of the movie to search for.
 
+		.PARAMETER ExactMatch
+			Only return results whose title matches -Name exactly.
+
 		.PARAMETER IMDBID
-			The IMDB ID of the movie to search for.
+			The IMDB ID of the movie to search for. Can include or exclude the 'tt' prefix.
 
 		.PARAMETER TMDBID
 			The TMDB ID of the movie to search for.
 
 		.EXAMPLE
-			Search-RadarrMovie -Name "The Matrix"
+			Find-RadarrMovie -Name "The Matrix"
+
+		.EXAMPLE
+			Find-RadarrMovie -Name "The Matrix" -ExactMatch
+
+		.EXAMPLE
+			Find-RadarrMovie -IMDBID 'tt1375666'
+
+		.EXAMPLE
+			Find-RadarrMovie -TMDBID '27205'
 
 		.NOTES
 			If you have the IMDB ID or TMDB ID of a movie, it's better to use this to search.
@@ -37,6 +50,7 @@ function Search-RadarrMovie
 		[String]$IMDBID,
 
 		[Parameter(Mandatory = $true, ParameterSetName = 'TMDBID')]
+		[ValidatePattern('^\d{1,9}$')]
 		[String]$TMDBID
 	)
 
@@ -54,18 +68,19 @@ function Search-RadarrMovie
 
 
 	####################################################################################################
-	# If using IMDB, ensure the ID is in the correct format
-	if($ParameterSetName -eq 'IMDBID' -and $IMDBID -notmatch '^tt')
+	# If using IMDB, ensure the ID is in the correct format. This is deliberately guarded on the variable
+	# rather than the parameter set name, so it cannot drift out of sync if a set is ever renamed.
+	if($IMDBID -and $IMDBID -notmatch '^tt')
 	{
 		$IMDBID = 'tt' + $IMDBID
 	}
 
 
 	####################################################################################################
-	#Region Define the path, parameters, headers and URI
+	#Region Define the path and parameters
 	try
 	{
-		$Path = "/movie/lookup"
+		$Path = '/movie/lookup'
 
 		if($Name)
 		{
@@ -91,10 +106,6 @@ function Search-RadarrMovie
 		{
 			throw 'You must specify a name, TMDBID, or IMDBID.'
 		}
-
-		# Generate the headers and URI
-		$Headers = Get-Headers
-		$Uri = Get-APIUri -RestEndpoint $Path -Params $Params
 	}
 	catch
 	{
@@ -105,16 +116,22 @@ function Search-RadarrMovie
 
 	####################################################################################################
 	#Region make the main request
-	Write-Verbose "Querying: $Uri"
 	try
 	{
-		$Data = Invoke-RestMethod -Uri $Uri -Headers $Headers -Method Get -ContentType 'application/json' -ErrorAction Stop
+		$Data = Invoke-RadarrRequest -Path $Path -Method GET -Params $Params -SuppressWhatIf -ErrorAction Stop
 		if($Data)
 		{
 			# If ExactMatch is specified, filter the results to only include the exact match
 			if($ExactMatch)
 			{
 				$Data = $Data | Where-Object { $_.title -eq $Name }
+			}
+
+			# The lookup-by-ID endpoints return a single movie, so more than one result means the response
+			# was not what this function assumes and callers expecting a single object would break silently.
+			if($PSCmdlet.ParameterSetName -match 'ID' -and @($Data).Count -gt 1)
+			{
+				throw "Multiple movies found for the provided ID. This should not happen!"
 			}
 
 			return $Data

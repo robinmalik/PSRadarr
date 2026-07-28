@@ -1,8 +1,11 @@
-#Get public and private function definition files.
-$Public  = @( Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue )
-$Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
+# In-session override for the selected context.
+$script:ActiveContext = $null
 
-write-verbose $PSScriptRoot
+#Get public and private function definition files.
+$Public  = @( Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -Recurse -ErrorAction SilentlyContinue )
+$Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -Recurse -ErrorAction SilentlyContinue )
+
+Write-Verbose -Message $PSScriptRoot
 
 #Dot source the files
 Foreach($import in @($Public + $Private))

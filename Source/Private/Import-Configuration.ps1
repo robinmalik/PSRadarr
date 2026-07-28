@@ -1,32 +1,28 @@
 function Import-Configuration
 {
+	<#
+		.SYNOPSIS
+			Loads the active context into the module-scoped $Config variable.
+
+		.DESCRIPTION
+			Every public function calls this before making a request. The active context is resolved by
+			Import-Context and stored in $Script:Config, which Invoke-RadarrRequest reads to build the
+			URI and headers.
+
+		.NOTES
+			This is a private function used internally by other module functions.
+	#>
+
 	[CmdletBinding()]
 	param(
 	)
 
-	$FileName = 'PSRadarrConfig.json'
-	$FilePath = "$HOME/.PSRadarr/$FileName"
-
-	if(Test-Path $FilePath)
+	try
 	{
-		try
-		{
-			$Script:Config = Get-Content $FilePath -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-		}
-		catch
-		{
-			throw $_
-		}
-
-		# Refine to our default server:
-		$Script:Config = $Script:Config | Where-Object { $_.Default -eq $True }
-		if(!$Script:Config)
-		{
-			throw "No default server found in $FilePath. Please run Set-RadarrConfiguration."
-		}
+		$Script:Config = Import-Context -ErrorAction Stop
 	}
-	else
+	catch
 	{
-		throw "Config file not found at $FilePath. Please run Set-RadarrConfiguration."
+		throw $_
 	}
 }

@@ -58,11 +58,10 @@ function Get-RadarrUpcomingMovies
 	#EndRegion
 
 	####################################################################################################
-    #Region Define the path, parameters, headers and URI
+	#Region Define the path and parameters
 	try
-    {
-        $Path = '/calendar'
-        $Headers = Get-Headers
+	{
+		$Path = '/calendar'
 
 		$Format = 'yyyy-MM-ddTHH:mm:ss.fffZ'
 		$Culture = [System.Globalization.CultureInfo]::InvariantCulture
@@ -76,7 +75,6 @@ function Get-RadarrUpcomingMovies
 		{
 			$Params['unmonitored'] = 'true'
 		}
-        $Uri = Get-APIUri -RestEndpoint $Path -Params $Params
 	}
 	catch
 	{
@@ -89,7 +87,7 @@ function Get-RadarrUpcomingMovies
 	#Region make the main request
 	try
 	{
-		$Data = Invoke-RestMethod -Uri $Uri -Headers $Headers -Method Get -ContentType 'application/json' -ErrorAction Stop
+		$Data = Invoke-RadarrRequest -Path $Path -Method GET -Params $Params -SuppressWhatIf -ErrorAction Stop
 		return $Data
 	}
 	catch
