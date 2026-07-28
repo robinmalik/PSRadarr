@@ -1,7 +1,8 @@
 /Excludes/
+/PSRadarr/
 /Secrets/
 /Tests/
 /Tests/.env
 /Workflow/
+AGENTS.md
 ToDo.md
-.vscode/settings.json
